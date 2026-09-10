@@ -1,0 +1,58 @@
+@startuml Main Process
+title Computer Repair System – Main Process
+
+start
+
+partition Customer {
+  :Enter repair shop with faulty computer;
+}
+
+partition Technician {
+  if (Customer already registered?) then (no)
+    :Create new customer account\n(capture customer details);
+  else (yes)
+  endif
+  :Log new repair ticket\n(complaint, customer details, date, computer info);
+  :Ticket assigned to technician;
+  :Diagnose issue\n(write notes, update ticket status);
+  :Generate quote (parts + labor);
+  :Ticket status -> "Awaiting customer approval";
+}
+
+partition Customer {
+  if (Customer approves repair?) then (no)
+    partition System {
+      :Update ticket status -> "Declined";
+      :Archive ticket;
+    }
+    stop
+  else (yes)
+  endif
+}
+
+partition Technician {
+  if (Parts required?) then (yes)
+    partition System {
+      if (Part in stock?) then (yes)
+        :Reserve part for ticket;
+      else (no)
+        :Order part from supplier;
+        :Reserve part on arrival;
+      endif
+    }
+  else (no)
+  endif
+
+  :Perform repair;
+
+  partition "Closure Checklist" {
+    :Finalize ticket;
+    :Calculate total cost (labor + parts);
+    :Update inventory\n(deduct used components);
+    :Archive repair history;
+  }
+}
+
+stop
+
+@enduml

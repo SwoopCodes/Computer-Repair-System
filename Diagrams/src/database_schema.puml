@@ -1,0 +1,74 @@
+@startuml Database Schema
+title Computer Repair System – ER Diagram
+
+skinparam linetype ortho
+skinparam roundcorner 8
+!pragma layout smetana
+skinparam entity {
+  BackgroundColor White
+  BorderColor #333333
+  FontStyle plain
+}
+
+entity "Customer" as customer {
+  * customer_id : int <<PK>>
+  --
+  first_name : varchar(50)
+  last_name : varchar(50)
+  email : varchar(100)
+  phone : varchar(20)
+  address : varchar(255)
+  registration_date : date
+}
+
+entity "Technician" as technician {
+  * technician_id : int <<PK>>
+  --
+  first_name : varchar(50)
+  last_name : varchar(50)
+  email : varchar(100)
+  phone : varchar(20)
+  specialization : varchar(100)
+  hire_date : date
+}
+
+entity "Ticket" as ticket {
+  * ticket_id : int <<PK>>
+  --
+  customer_id : int <<FK>>
+  technician_id : int <<FK>>
+  date_created : date
+  device_info : varchar(255)
+  complaint : text
+  diagnosis_notes : text
+  status : char
+  labor_cost : decimal(10,2)
+  total_cost : decimal(10,2)
+}
+
+entity "Inventory" as inventory {
+  * product_id : int <<PK>>
+  --
+  product_name : varchar(100)
+  description : text
+  current_stock : int
+  min_stock_level : int
+  price : decimal(10,2)
+  supplier : varchar(100)
+}
+
+entity "Ticket_Parts" as ticket_parts {
+  * ticket_part_id : int <<PK>>
+  --
+  ticket_id : int <<FK>>
+  product_id : int <<FK>>
+  quantity : int
+  unit_price : decimal(10,2)
+}
+
+customer ||--o{ ticket : places
+technician ||--o{ ticket : "assigned to"
+ticket ||--o{ ticket_parts : includes
+inventory ||--o{ ticket_parts : "used in"
+
+@enduml
