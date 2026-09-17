@@ -1,37 +1,32 @@
 # azure-pipelines-mirror.yml
-# This pipeline mirrors the GitHub repository to an Azure DevOps repository.
-
 trigger: none
 
 schedules:
-- cron: "*/10 * * * *"  # Runs every 10 minutes. Adjust as needed.
+- cron: "*/10 * * * *"
   displayName: 'Mirror from GitHub'
   branches:
     include:
-    - main  # The default branch of your GitHub repo.
+    - main
   always: true
 
 pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- checkout: none  # We don't need to checkout the Azure repo.
+- checkout: none
 
 - script: |
-    # Clone the GitHub repository in mirror mode.
-    # This fetches all branches, tags, and refs.
-    git clone --mirror https://$(GITHUB_PAT)@github.com/SwoopCodes/Computer-Repair-System.git mirror-repo
+    # Use $GITHUB_PAT and $AZURE_PAT (no $()) because they are now env vars.
+    git clone --mirror https://$GITHUB_PAT@github.com/SwoopCodes/Computer-Repair-System.git mirror-repo
     
     cd mirror-repo
     
-    # Add the Azure DevOps repository as a remote.
-    # The URL uses the Azure DevOps PAT for authentication.
-    git remote add azure https://$(AZURE_PAT)@dev.azure.com/Computer-Repair-System-PRJ/_git/Computer-Repair-System
+    # Use the environment variable for the Azure PAT here as well.
+    git remote add azure https://$AZURE_PAT@dev.azure.com/Computer-Repair-System-PRJ/_git/Computer-Repair-System
     
-    # Push all refs (branches, tags) to the Azure remote.
-    # The --mirror flag ensures a complete, exact copy.
     git push azure --mirror
   displayName: 'Mirror GitHub to Azure Repos'
   env:
+    # Map the secret pipeline variables to environment variables.
     GITHUB_PAT: $(GitHubPAT)
     AZURE_PAT: $(AzureDevOpsPAT)
