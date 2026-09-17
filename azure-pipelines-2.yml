@@ -2,8 +2,8 @@
 trigger: none
 
 schedules:
-- cron: "*/10 * * * *"
-  displayName: 'Mirror from GitHub'
+- cron: "*/10 * * * *"  # Every 10 minutes. Adjust as needed.
+  displayName: 'Sync from GitHub'
   branches:
     include:
     - main
@@ -16,17 +16,17 @@ steps:
 - checkout: none
 
 - script: |
-    # Use $GITHUB_PAT and $AZURE_PAT (no $()) because they are now env vars.
-    git clone --mirror https://$GITHUB_PAT@github.com/SwoopCodes/Computer-Repair-System.git mirror-repo
-    
+    # 1. Clone GitHub repo as a bare repository (fetches all branches and tags)
+    git clone --bare https://$GITHUB_PAT@github.com/SwoopCodes/Computer-Repair-System.git mirror-repo
     cd mirror-repo
-    
-    # Use the environment variable for the Azure PAT here as well.
+
+    # 2. Add the Azure DevOps remote
     git remote add azure https://$AZURE_PAT@dev.azure.com/Computer-Repair-System-PRJ/_git/Computer-Repair-System
-    
-    git push azure --mirror
-  displayName: 'Mirror GitHub to Azure Repos'
+
+    # 3. Push all branches and tags WITHOUT force
+    git push azure --all
+    git push azure --tags
+  displayName: 'Sync GitHub to Azure Repos (no force push)'
   env:
-    # Map the secret pipeline variables to environment variables.
     GITHUB_PAT: $(GitHubPAT)
     AZURE_PAT: $(AzureDevOpsPAT)
