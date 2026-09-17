@@ -1,0 +1,154 @@
+# Computer Repair System - Azure Pipelines
+# Values marked REPLACE_ME must be changed in Azure DevOps before the
+# Build push and Deploy stages are switched on. The Validate stage needs
+# nothing configured and runs as-is.
+
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  nodeVersion: '22.x'
+  imageName: 'computer-repair-system'
+  imageTag: '$(Build.BuildId)'
+  # Set these two to 'true' as pipeline variables in Azure DevOps once the
+  # ACR service connection and App Services exist. They are 'false' here on
+  # purpose so a fresh clone of this repo builds green.
+  pushToAcr: 'false'
+  deployEnabled: 'false'
+  acrServiceConnection: 'REPLACE_ME-acr-service-connection'
+  acrLoginServer: 'REPLACE_ME.azurecr.io'
+  # When the variable group exists, uncomment the next line and delete the
+  # two REPLACE_ME lines above. Secrets (DB connection string etc.) go in
+  # that group or in Key Vault, never in this file.
+  # - group: crs-pipeline-variables
+
+stages:
+  - stage: Validate
+    displayName: Install, lint, test, audit
+    jobs:
+      - job: validate
+        displayName: Validate
+        steps:
+          - task: NodeTool@0
+            displayName: Use Node $(nodeVersion)
+            inputs:
+              versionSpec: $(nodeVersion)
+
+          - script: npm ci
+            displayName: Install dependencies (npm ci)
+
+          - script: npm run lint
+            displayName: Run ESLint
+
+          - script: npm run test:ci
+            displayName: Run Jest tests with coverage
+
+          - task: PublishTestResults@2
+            displayName: Publish Jest results
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: JUnit
+              testResultsFiles: test-results/junit.xml
+              testRunTitle: Jest unit tests
+              failTaskOnFailedTests: true
+
+          - task: PublishCodeCoverageResults@2
+            displayName: Publish code coverage
+            condition: succeededOrFailed()
+            inputs:
+              summaryFileLocation: coverage/cobertura-coverage.xml
+
+          - script: npm run audit:ci
+            displayName: npm audit (high and critical fail the build)
+
+  - stage: Build
+    displayName: Build Docker image
+    dependsOn: Validate
+    jobs:
+      - job: docker_build
+        displayName: Build image
+        steps:
+          - task: Docker@2
+            displayName: docker build
+            inputs:
+              command: build
+              Dockerfile: Dockerfile
+              repository: $(imageName)
+              tags: |
+                $(imageTag)
+                latest
+
+          - script: docker run --rm $(imageName):$(imageTag) node -e "require('./src/app')"
+            displayName: Smoke test image starts
+
+      - job: docker_push
+        displayName: Push image to ACR
+        dependsOn: docker_build
+        condition: and(succeeded(), eq(variables['pushToAcr'], 'true'))
+        steps:
+          - task: Docker@2
+            displayName: Login to ACR
+            inputs:
+              command: login
+              containerRegistry: $(acrServiceConnection)
+
+          - task: Docker@2
+            displayName: Build and push
+            inputs:
+              command: buildAndPush
+              containerRegistry: $(acrServiceConnection)
+              repository: $(imageName)
+              Dockerfile: Dockerfile
+              tags: |
+                $(imageTag)
+                latest
+
+  - stage: DeployDev
+    displayName: Deploy to dev
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['deployEnabled'], 'true'))
+    jobs:
+      - deployment: deploy_dev
+        displayName: Deploy dev
+        environment: crs-dev
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo "Placeholder - deploy $(acrLoginServer)/$(imageName):$(imageTag) to REPLACE_ME-crs-dev App Service"
+                  displayName: Deploy placeholder
+
+  - stage: DeployTest
+    displayName: Deploy to test
+    dependsOn: DeployDev
+    condition: and(succeeded(), eq(variables['deployEnabled'], 'true'))
+    jobs:
+      - deployment: deploy_test
+        displayName: Deploy test
+        environment: crs-test
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo "Placeholder - deploy $(acrLoginServer)/$(imageName):$(imageTag) to REPLACE_ME-crs-test App Service"
+                  displayName: Deploy placeholder
+
+  - stage: DeployProd
+    displayName: Deploy to production
+    dependsOn: DeployTest
+    condition: and(succeeded(), eq(variables['deployEnabled'], 'true'))
+    jobs:
+      - deployment: deploy_prod
+        displayName: Deploy prod
+        environment: crs-prod
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo "Placeholder - deploy $(acrLoginServer)/$(imageName):$(imageTag) to REPLACE_ME-crs-prod App Service"
+                  displayName: Deploy placeholder
