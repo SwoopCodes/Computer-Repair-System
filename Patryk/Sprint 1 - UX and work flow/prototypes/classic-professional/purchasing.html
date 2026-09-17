@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Purchasing — Computer Repair System</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="topbar">
+  <div class="brand">RepairDesk</div>
+  <nav aria-label="Main">
+    <a href="index.html">Dashboard</a>
+    <a href="tickets.html">Tickets</a>
+    <a href="inventory.html" aria-current="page">Parts</a>
+    <a href="customers.html">Customers</a>
+    <a href="technicians.html">Technicians</a>
+  </nav>
+</header>
+<main id="main">
+  <h1>Parts</h1>
+  <nav class="sub-nav" aria-label="Parts section">
+    <a href="inventory.html">Inventory</a>
+    <a href="reserve-parts.html">Reserve Parts</a>
+    <a href="purchasing.html" aria-current="page">Purchasing</a>
+  </nav>
+
+  <h2>Buy Stock</h2>
+  <p class="hint">Pick a part and a quantity, then press Buy — stock is added right away.</p>
+  <form id="buy-form" class="form-panel">
+    <div class="field-row">
+      <label for="buy-part">Part</label>
+      <select id="buy-part"></select>
+    </div>
+    <div class="field-row">
+      <label for="buy-qty">Quantity</label>
+      <input id="buy-qty" type="number" min="1" value="1" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Buy</button>
+  </form>
+  <p class="save-msg" id="buy-msg" role="status" aria-live="polite"></p>
+</main>
+<script src="../data.js"></script>
+<script src="../app.js"></script>
+<script>initPurchasingPage();</script>
+</body>
+</html>

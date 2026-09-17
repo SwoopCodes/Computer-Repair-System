@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Customers — Computer Repair System</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="topbar">
+  <div class="brand">RepairDesk</div>
+  <nav aria-label="Main">
+    <a href="index.html">Dashboard</a>
+    <a href="tickets.html">Tickets</a>
+    <a href="inventory.html">Parts</a>
+    <a href="customers.html" aria-current="page">Customers</a>
+    <a href="technicians.html">Technicians</a>
+  </nav>
+</header>
+<main id="main">
+  <div class="page-heading">
+    <h1>Customers</h1>
+    <button class="btn btn-primary" id="add-customer-btn">+ Add Customer</button>
+  </div>
+  <p class="hint">Select a customer to view and update their details in the same screen.</p>
+  <div class="master-detail">
+    <ul class="list-panel" id="customer-list" aria-label="Customer list"></ul>
+    <div class="detail-panel" id="customer-detail">
+      <p class="empty-state">Select a customer from the list to view and update it.</p>
+    </div>
+  </div>
+</main>
+<script src="../data.js"></script>
+<script src="../app.js"></script>
+<script>initCustomersPage();</script>
+</body>
+</html>

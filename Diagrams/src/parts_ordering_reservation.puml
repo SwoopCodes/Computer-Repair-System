@@ -1,0 +1,38 @@
+@startuml Parts Ordering and Reservation
+title Computer Repair System – Parts Ordering & Reservation Workflow
+
+!pragma layout smetana
+
+start
+
+partition Technician {
+  :Add required part to ticket\n(select part + quantity);
+}
+
+partition System {
+  if (current_stock >= requested quantity?) then (yes)
+    :Reserve quantity against ticket\n(create Ticket_Parts row);
+    :Decrease current_stock;
+  else (no)
+    partition "Staff (Purchasing screen)" {
+      :Select part + quantity to buy;
+      :Press "Buy";
+    }
+    :Increase current_stock by purchased quantity;
+    :Reserve quantity against ticket\n(create Ticket_Parts row);
+    :Decrease current_stock;
+  endif
+}
+
+partition Technician {
+  :Continue repair with reserved part;
+}
+
+partition "Closure Checklist" {
+  :Finalize ticket;
+  :Consume reservation\n(part counted as used on this ticket);
+}
+
+stop
+
+@enduml

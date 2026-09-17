@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Reserve Parts — Computer Repair System</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="topbar">
+  <div class="brand">RepairDesk</div>
+  <nav aria-label="Main">
+    <a href="index.html">Dashboard</a>
+    <a href="tickets.html">Tickets</a>
+    <a href="inventory.html" aria-current="page">Parts</a>
+    <a href="customers.html">Customers</a>
+    <a href="technicians.html">Technicians</a>
+  </nav>
+</header>
+<main id="main">
+  <h1>Parts</h1>
+  <nav class="sub-nav" aria-label="Parts section">
+    <a href="inventory.html">Inventory</a>
+    <a href="reserve-parts.html" aria-current="page">Reserve Parts</a>
+    <a href="purchasing.html">Purchasing</a>
+  </nav>
+
+  <h2>Reserve a Part for a Ticket</h2>
+  <p class="hint">Assign a part to an active ticket. If there isn't enough stock, buy more from Purchasing first.</p>
+  <form id="reserve-parts-form" class="form-panel">
+    <div class="field-row">
+      <label for="rp-ticket">Ticket</label>
+      <select id="rp-ticket"></select>
+    </div>
+    <div class="field-row">
+      <label for="rp-part">Part</label>
+      <select id="rp-part"></select>
+    </div>
+    <div class="field-row">
+      <label for="rp-qty">Quantity</label>
+      <input id="rp-qty" type="number" min="1" value="1" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Reserve</button>
+  </form>
+  <p class="save-msg" id="reserve-msg" role="status" aria-live="polite"></p>
+</main>
+<script src="../data.js"></script>
+<script src="../app.js"></script>
+<script>initReservePartsPage();</script>
+</body>
+</html>

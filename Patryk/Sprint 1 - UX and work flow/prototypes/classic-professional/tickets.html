@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tickets — Computer Repair System</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="topbar">
+  <div class="brand">RepairDesk</div>
+  <nav aria-label="Main">
+    <a href="index.html">Dashboard</a>
+    <a href="tickets.html" aria-current="page">Tickets</a>
+    <a href="inventory.html">Parts</a>
+    <a href="customers.html">Customers</a>
+    <a href="technicians.html">Technicians</a>
+  </nav>
+</header>
+<main id="main">
+  <div class="page-heading">
+    <h1>Tickets</h1>
+    <a class="btn btn-primary" href="ticket-new.html">+ New Ticket</a>
+  </div>
+  <p class="hint">Select a ticket to view and update it — viewing and editing happen in the same screen.</p>
+
+  <div class="tabs" role="tablist" aria-label="Ticket list filter">
+    <button role="tab" aria-selected="true" data-ticket-filter="active">Active</button>
+    <button role="tab" aria-selected="false" data-ticket-filter="closed">Closed</button>
+  </div>
+
+  <div class="master-detail">
+    <ul class="list-panel" id="ticket-list" aria-label="Ticket list"></ul>
+    <div class="detail-panel" id="ticket-detail"></div>
+  </div>
+</main>
+<script src="../data.js"></script>
+<script src="../app.js"></script>
+<script>initTicketsPage();</script>
+</body>
+</html>

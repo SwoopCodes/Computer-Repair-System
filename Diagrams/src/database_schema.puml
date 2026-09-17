@@ -28,8 +28,6 @@ entity "Technician" as technician {
   last_name : varchar(50)
   email : varchar(100)
   phone : varchar(20)
-  specialization : varchar(100)
-  hire_date : date
 }
 
 entity "Ticket" as ticket {
@@ -42,6 +40,7 @@ entity "Ticket" as ticket {
   complaint : text
   diagnosis_notes : text
   status : char
+  priority : char
   labor_cost : decimal(10,2)
   total_cost : decimal(10,2)
 }
@@ -52,9 +51,7 @@ entity "Inventory" as inventory {
   product_name : varchar(100)
   description : text
   current_stock : int
-  min_stock_level : int
   price : decimal(10,2)
-  supplier : varchar(100)
 }
 
 entity "Ticket_Parts" as ticket_parts {

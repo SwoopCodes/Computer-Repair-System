@@ -1,0 +1,25 @@
+@startuml Flow Walkin Repair
+title User Flow – Log a Walk-in Repair
+
+!pragma layout smetana
+
+start
+
+:Customer arrives with faulty device;
+
+if (Customer already exists?) then (no)
+  :Staff opens Customers screen;
+  :Add Customer\n(name, email, phone, address);
+else (yes)
+  :Staff finds existing customer\nvia Customers screen;
+endif
+
+:Staff opens Tickets screen;
+:Create Ticket\n(select customer, device info, complaint);
+:Assign technician;
+:Ticket status set to D — Diagnosing;
+:Technician writes diagnosis notes\nin the ticket detail panel;
+
+stop
+
+@enduml

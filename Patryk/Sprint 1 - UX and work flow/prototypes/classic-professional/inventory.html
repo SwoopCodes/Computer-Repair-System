@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Inventory — Computer Repair System</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="topbar">
+  <div class="brand">RepairDesk</div>
+  <nav aria-label="Main">
+    <a href="index.html">Dashboard</a>
+    <a href="tickets.html">Tickets</a>
+    <a href="inventory.html" aria-current="page">Parts</a>
+    <a href="customers.html">Customers</a>
+    <a href="technicians.html">Technicians</a>
+  </nav>
+</header>
+<main id="main">
+  <h1>Parts</h1>
+  <nav class="sub-nav" aria-label="Parts section">
+    <a href="inventory.html" aria-current="page">Inventory</a>
+    <a href="reserve-parts.html">Reserve Parts</a>
+    <a href="purchasing.html">Purchasing</a>
+  </nav>
+
+  <div class="tabs" role="tablist" aria-label="Inventory view">
+    <button role="tab" aria-selected="true" data-tab="tab-stock">Stock</button>
+    <button role="tab" aria-selected="false" data-tab="tab-reserved">Reserved</button>
+  </div>
+
+  <div class="tab-panel" id="tab-stock" role="tabpanel">
+    <table>
+      <caption class="sr-only">Parts currently in stock</caption>
+      <thead><tr><th scope="col">Part</th><th scope="col">Description</th><th scope="col">Current Stock</th><th scope="col">Price</th></tr></thead>
+      <tbody id="stock-body"></tbody>
+    </table>
+  </div>
+
+  <div class="tab-panel" id="tab-reserved" role="tabpanel" hidden>
+    <table>
+      <caption class="sr-only">Parts currently reserved against a ticket</caption>
+      <thead><tr><th scope="col">Part</th><th scope="col">Qty Reserved</th><th scope="col">Reserved For</th></tr></thead>
+      <tbody id="reserved-body"></tbody>
+    </table>
+  </div>
+</main>
+<script src="../data.js"></script>
+<script src="../app.js"></script>
+<script>initInventoryPage();</script>
+</body>
+</html>

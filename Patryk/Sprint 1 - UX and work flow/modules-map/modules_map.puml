@@ -1,0 +1,46 @@
+@startuml Modules Map
+title Computer Repair System – Corrected Modules / Screens Map
+
+!pragma layout smetana
+
+left to right direction
+
+card "Computer Repair System" as root
+
+card "Tickets" as tickets
+card "View / Update Tickets" as tickets_view
+card "Create Ticket" as tickets_create
+card "Quote" as quote
+card "Closure Checklist" as checklist
+
+card "Parts" as parts
+card "Inventory (Stock + Reserved)" as inventory
+card "Purchasing" as purchasing
+
+card "Technicians" as technicians
+card "View / Update Technicians" as tech_view
+card "Add Technician" as tech_add
+
+card "Customers" as customers
+card "View / Update Customers" as cust_view
+card "Add Customer" as cust_add
+
+root --> tickets
+tickets --> tickets_view
+tickets --> tickets_create
+tickets --> quote
+tickets --> checklist
+
+root --> parts
+parts --> inventory
+parts --> purchasing
+
+root --> technicians
+technicians --> tech_view
+technicians --> tech_add
+
+root --> customers
+customers --> cust_view
+customers --> cust_add
+
+@enduml

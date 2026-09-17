@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dashboard — Computer Repair System</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="topbar">
+  <div class="brand">RepairDesk</div>
+  <nav aria-label="Main">
+    <a href="index.html" aria-current="page">Dashboard</a>
+    <a href="tickets.html">Tickets</a>
+    <a href="inventory.html">Parts</a>
+    <a href="customers.html">Customers</a>
+    <a href="technicians.html">Technicians</a>
+  </nav>
+</header>
+<main id="main">
+  <h1>Dashboard</h1>
+  <section class="stat-cards">
+    <div class="stat-card"><span class="stat-num" id="stat-open">0</span><span class="stat-label">Open Tickets</span></div>
+    <div class="stat-card"><span class="stat-num" id="stat-awaiting">0</span><span class="stat-label">Awaiting Approval</span></div>
+  </section>
+
+  <div class="quick-links">
+    <a class="btn btn-primary" href="ticket-new.html">+ New Ticket</a>
+    <a class="btn" href="tickets.html">View All Tickets</a>
+    <a class="btn" href="purchasing.html">Purchasing</a>
+  </div>
+
+  <section>
+    <h2>Open Tickets by Priority</h2>
+    <ul class="priority-breakdown" id="priority-breakdown"></ul>
+  </section>
+
+  <section>
+    <h2>Recent Tickets</h2>
+    <ul class="recent-list" id="recent-tickets"></ul>
+  </section>
+</main>
+<script src="../data.js"></script>
+<script src="../app.js"></script>
+<script>renderDashboard();</script>
+</body>
+</html>

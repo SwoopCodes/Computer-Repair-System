@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Create Ticket — Computer Repair System</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="topbar">
+  <div class="brand">RepairDesk</div>
+  <nav aria-label="Main">
+    <a href="index.html">Dashboard</a>
+    <a href="tickets.html" aria-current="page">Tickets</a>
+    <a href="inventory.html">Parts</a>
+    <a href="customers.html">Customers</a>
+    <a href="technicians.html">Technicians</a>
+  </nav>
+</header>
+<main id="main">
+  <h1>Create Ticket</h1>
+  <form id="new-ticket-form" class="form-panel">
+    <div class="field-row">
+      <label for="nt-customer">Customer</label>
+      <select id="nt-customer" required></select>
+    </div>
+    <div class="field-row">
+      <label for="nt-technician">Assign technician</label>
+      <select id="nt-technician" required></select>
+    </div>
+    <div class="field-row">
+      <label for="nt-device">Device</label>
+      <input id="nt-device" type="text" required placeholder="e.g. Dell XPS 13">
+    </div>
+    <div class="field-row">
+      <label for="nt-complaint">Complaint</label>
+      <textarea id="nt-complaint" rows="3" required placeholder="Describe the reported issue"></textarea>
+    </div>
+    <div class="field-row">
+      <label for="nt-priority">Priority</label>
+      <select id="nt-priority">
+        <option value="L">Low</option>
+        <option value="M" selected>Medium</option>
+        <option value="H">High</option>
+        <option value="U">Urgent</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Create Ticket</button>
+  </form>
+</main>
+<script src="../data.js"></script>
+<script src="../app.js"></script>
+<script>initNewTicketForm();</script>
+</body>
+</html>

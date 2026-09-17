@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Technicians — Computer Repair System</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="topbar">
+  <div class="brand">RepairDesk</div>
+  <nav aria-label="Main">
+    <a href="index.html">Dashboard</a>
+    <a href="tickets.html">Tickets</a>
+    <a href="inventory.html">Parts</a>
+    <a href="customers.html">Customers</a>
+    <a href="technicians.html" aria-current="page">Technicians</a>
+  </nav>
+</header>
+<main id="main">
+  <div class="page-heading">
+    <h1>Technicians</h1>
+    <button class="btn btn-primary" id="add-technician-btn">+ Add Technician</button>
+  </div>
+  <p class="hint">Select a technician to view and update their details in the same screen.</p>
+  <div class="master-detail">
+    <ul class="list-panel" id="technician-list" aria-label="Technician list"></ul>
+    <div class="detail-panel" id="technician-detail">
+      <p class="empty-state">Select a technician from the list to view and update it.</p>
+    </div>
+  </div>
+</main>
+<script src="../data.js"></script>
+<script src="../app.js"></script>
+<script>initTechniciansPage();</script>
+</body>
+</html>

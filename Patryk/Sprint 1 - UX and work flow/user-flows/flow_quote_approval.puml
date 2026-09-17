@@ -1,0 +1,25 @@
+@startuml Flow Quote Approval
+title User Flow – Quote and Get Approval
+
+!pragma layout smetana
+
+start
+
+:Technician opens ticket detail panel\n(from Tickets screen);
+:Enter labor cost + reserved parts cost;
+:System calculates total_cost;
+:Ticket status set to A — Awaiting Approval;
+
+:Technician relays quote to customer\n(in person / by phone — outside the system);
+
+if (Customer's real-world decision) then (approves)
+  :Staff presses "Approved" button\nin the ticket detail panel;
+  :Ticket status set to R — Repairing;
+else (declines)
+  :Staff presses "Not Approved" button\nin the ticket detail panel;
+  :Ticket status set to X — Declined;
+endif
+
+stop
+
+@enduml

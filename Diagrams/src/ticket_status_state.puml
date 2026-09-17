@@ -1,0 +1,22 @@
+@startuml Ticket Status State
+title Computer Repair System – Ticket Status State Diagram
+
+!pragma layout smetana
+
+[*] --> D
+
+state "D — Diagnosing" as D
+state "A — Awaiting Approval" as A
+state "R — Repairing" as R
+state "C — Completed" as C
+state "X — Declined" as X
+
+D --> A : quote generated
+A --> R : technician marks Approved
+A --> X : technician marks Not Approved
+R --> C : closure checklist finished
+
+C --> [*]
+X --> [*]
+
+@enduml

@@ -1,0 +1,21 @@
+@startuml Flow Close Ticket
+title User Flow – Close a Ticket
+
+!pragma layout smetana
+
+start
+
+:Ticket status is R — Repairing;
+:Technician finishes the repair;
+:Technician opens Closure Checklist section\nin the ticket detail panel;
+
+:Finalize ticket notes;
+:Confirm reserved parts consumed\n(current_stock already decremented at reservation time);
+:Confirm total cost (labor + parts);
+
+:Press "Complete Ticket";
+:Ticket status set to C — Completed;
+
+stop
+
+@enduml
