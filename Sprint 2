@@ -1,0 +1,643 @@
+# Sprint 2 – Building the Application
+
+[[_TOC_]]
+
+> Sprint 1 designed the system. Sprint 2 starts building it.
+> This page **adds to** the Sprint 1 pages and does not replace them. Where Sprint 2 needs something recorded on a Sprint 1 page, add it there as a new "Sprint 2 notes" section at the bottom. Don't rewrite what's already there.
+
+---
+
+## Sprint goal
+
+By the end of Sprint 2, a member of staff can do all of this on the live dev site, **https://crs-dev-i3q75k.azurewebsites.net**:
+
+1. Register a walk-in customer, or find one who has been in before
+2. Log a repair ticket for them
+3. Assign the ticket to a technician
+4. Move the ticket along its status (Diagnosing → Awaiting approval, and so on)
+5. Find the ticket again in the ticket list using filters
+6. Check parts stock, with low stock highlighted
+
+This is the first half of the **Walk-in repair** flow on the UX Design page. Quotes, reserving parts and closing tickets come in Sprint 3.
+
+---
+
+## Who does what
+
+There are five of us and five pieces of work (the foundation plus four modules), so **everyone owns exactly one thing**. Each module is owned from top to bottom: the SQL, the API, the page and the tests. This matches the High-Level Architecture page (one module per epic), and it means nobody sits waiting for someone else to finish "their half".
+
+| Person | Owns | Work items | Pull requests reviewed by |
+|---|---|---|---|
+| Patryk | Foundation (the setup everyone else builds on) | F1–F6 below | Dennis |
+| Albin | Finish #23, then the Customers module | #23, #53, #34, #54 | Eron |
+| Eron | Tickets module | #33, #36, #35, #38, #37 | Albin |
+| Dennis | Technicians module | #50, #51 | Elisha |
+| Elisha | Inventory module | #43, #44, #45 | Dennis |
+
+Customers and Tickets connect closely, so Albin and Eron review each other's work. Patryk also reviews any change to the shared files. Once the foundation is done, he helps whoever is furthest behind.
+
+Swap names around freely if it suits the team better.
+
+---
+
+## Sprint 2 scope
+
+**Must** items are the sprint goal. **Stretch** items are done only if the Must items are finished; anything left over moves to Sprint 3.
+
+| Issue | Module | Owner | Priority |
+|---|---|---|---|
+| #53 Register a new customer | Customers | Albin | Must |
+| #34 Find an existing customer when logging a ticket | Customers | Albin (API), Eron (search box on the New ticket page) | Must |
+| #54 Update customer contact details | Customers | Albin | Stretch |
+| #50 Add a technician | Technicians | Dennis | Must |
+| #51 Update a technician's details | Technicians | Dennis | Stretch |
+| #33 Log a new repair ticket | Tickets | Eron | Must |
+| #36 View and filter the ticket list | Tickets | Eron | Must |
+| #35 Assign a ticket to a technician | Tickets | Eron | Must |
+| #38 Update ticket status | Tickets | Eron | Must |
+| #37 Add dated diagnosis notes | Tickets | Eron | Stretch |
+| #43 View stock levels | Inventory | Elisha | Must |
+| #45 Add and update parts | Inventory | Elisha | Must |
+| #44 Highlight parts below minimum stock | Inventory | Elisha | Must |
+
+**Not in Sprint 2:** #39–#42, #46–#49, #52, #55 (see [Future sprints](#future-sprints)) and #60 Staff sign-in (still up for debate, see the UX Design page).
+
+### Foundation tasks (Patryk)
+
+Create these as new Tasks on the board in the Sprint 2 iteration. Everyone else depends on F1–F3, so they go first.
+
+| ID | Task | Why | Done when |
+|---|---|---|---|
+| F1 | Set up the folder structure inside `test_app` | Everyone copies the same layout (see [Where code goes](#where-code-goes)) | All four module folders exist, all four routers are registered in `app.js`, `/api/health` and `/api/health/db` still work, pipeline is green |
+| F2 | Shared database pool and error handling | Connection pooling is on the Architecture page; one error format keeps things simple | `src/db.js`, `src/errors.js` and an error handler in `app.js` exist (see the [Appendix](#appendix-pattern-to-copy)) |
+| F3 | Database scripts | Build the six tables from the Data Model page | `npm run db:setup` creates every table, both locally and on `crs-dev`; `npm run db:seed` adds fake data |
+| F4 | ESLint | Linting is on the Architecture page (Maintainability) | `npm run lint` passes and runs in the pipeline before the tests |
+| F5 | Shared front-end pieces | Every page looks and behaves the same | Nav bar, `public/css/styles.css` with the status and priority badge colours from the UX Design page, and `public/js/api.js` |
+| F6 | Protect `main` and the dev site | Stops broken code reaching the dev site | Branch policy on `main` (1 reviewer, build must pass); PR builds don't push or deploy; **HTTPS Only** switched on for `crs-dev-i3q75k` |
+
+**Note for F6:** the branch policy makes the pipeline run on every pull request. Because the pipeline also builds, pushes and deploys, add this condition to the Build and push, Deploy and Smoke test steps, so only Install and Test run for pull requests:
+
+```yaml
+condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+```
+
+Without it, an unreviewed branch could get pushed as `latest` and deployed to the dev site.
+
+---
+
+## Order of work
+
+This assumes a two-week sprint (10 working days). Stretch the days if the sprint is longer.
+
+| Person | Days 1–2 | Days 3–5 | Days 6–7 | Days 8–9 |
+|---|---|---|---|---|
+| Patryk | F1, F2, F3 (push these as early as possible) | F4, F5, F6 | Help whoever is furthest behind | Help and review |
+| Albin | Finish #23 | Customers API (#53, #34) | Customers page, connected to the API | Stretch: #54 |
+| Eron | Ticket pages with made-up data | Tickets API (#33, #36) | #35, #38, and connect the pages to the API | Stretch: #37 |
+| Dennis | Technicians page with made-up data | Technicians API (#50) | Connect the page to the API | Stretch: #51 |
+| Elisha | Inventory page with made-up data | Inventory API (#43, #45) | #44, and connect the page to the API | Help whoever is behind |
+
+**Day 10 (everyone):** demo the sprint goal on the live dev site, then the retrospective, then Sprint 3 planning.
+
+"Page with made-up data" means building the page from its wireframe as plain HTML, with fake rows typed straight into the page. No API is needed for that, so nobody sits idle while the foundation is being built.
+
+### Dependencies to link on the board
+
+Add these as Predecessor/Successor links, the same way #23 asks for the Sprint 1 links.
+
+| Finish first | Then |
+|---|---|
+| F1, F2, F3 | Every issue in this sprint |
+| #53 Register a new customer, #34 Find an existing customer | #33 Log a new repair ticket |
+| #50 Add a technician | #35 Assign a ticket to a technician |
+| #33 Log a new repair ticket | #36, #38, #37 |
+| #43 View stock levels | #44 Highlight parts below minimum stock |
+
+The seed data (F3) includes fake customers and technicians, so Eron can start on tickets before the Customers and Technicians pages are finished.
+
+---
+
+## Where code goes
+
+`test_app` already exists and the pipeline already builds and deploys it, so we build inside it rather than starting a new app. If its current files are laid out differently, F1 moves them into this layout.
+
+```
+test_app/
+├── database/
+│   ├── 001_create_tables.sql
+│   └── seed_fake_data.sql
+├── public/                      ← front end (plain HTML, CSS, JS)
+│   ├── index.html               ← ticket list (home page)
+│   ├── ticket-new.html
+│   ├── ticket.html
+│   ├── customers.html
+│   ├── technicians.html
+│   ├── inventory.html
+│   ├── css/styles.css           ← shared
+│   └── js/
+│       ├── api.js               ← shared
+│       ├── tickets.js
+│       ├── customers.js
+│       ├── technicians.js
+│       └── inventory.js
+├── scripts/
+│   └── db.js                    ← runs the SQL files (db:setup, db:seed, db:reset)
+├── src/
+│   ├── app.js                   ← shared: creates the Express app and exports it
+│   ├── server.js                ← shared: starts listening (kept separate so tests can load app.js)
+│   ├── db.js                    ← shared: one connection pool
+│   ├── errors.js                ← shared
+│   └── modules/
+│       ├── customers/
+│       │   ├── customers.routes.js
+│       │   ├── customers.controller.js
+│       │   ├── customers.service.js
+│       │   └── customers.data.js
+│       ├── technicians/         ← same four files
+│       ├── tickets/             ← same four files
+│       └── inventory/           ← same four files
+└── tests/
+    ├── customers.test.js
+    ├── technicians.test.js
+    ├── tickets.test.js
+    └── inventory.test.js
+```
+
+### What each layer does
+
+This is the routes → controllers → services → data access structure from the Architecture page.
+
+| Layer | File | Does | Never does |
+|---|---|---|---|
+| Route | `*.routes.js` | Connects a URL to a controller function | Any logic |
+| Controller | `*.controller.js` | Reads the request, calls the service, sends the response | SQL or business rules |
+| Service | `*.service.js` | Checks the input and applies the rules (for example, which status changes are allowed) | SQL, or touching `req`/`res` |
+| Data access | `*.data.js` | Runs SQL queries, always with parameters | Validation, or touching `req`/`res` |
+
+A worked example of all four layers is in the [Appendix](#appendix-pattern-to-copy). Copy it.
+
+### Who can change which files
+
+Files inside your own module folder, page and test file are yours. The shared files (`app.js`, `server.js`, `db.js`, `errors.js`, `styles.css`, `api.js`, the nav bar) belong to Patryk. If you need one of them changed, tell him or open a small pull request with only that change. F1 registers all four routers in `app.js` up front, so nobody else should need to touch it.
+
+---
+
+## Database
+
+### Scripts
+
+The six tables from the Data Model page (Customer, Technician, Ticket, Diagnosis_Note, Inventory, Ticket_Parts) are created by SQL files in `database/`, run with npm scripts that read the connection details from `.env`.
+
+| Command | What it does | Where it's safe to run |
+|---|---|---|
+| `npm run db:setup` | Creates any tables and indexes that don't exist yet. Never drops anything, so it's safe to run twice. | Local and `crs-dev` |
+| `npm run db:seed` | Adds fake customers, technicians, parts and tickets | Local and `crs-dev` (fake data only) |
+| `npm run db:reset` | Drops every table and recreates it empty | **Local only.** The script must refuse to run unless `DB_HOST` is `localhost`. |
+
+Write the SQL without `GO` lines, so the script can send each file in one go. Use `IF OBJECT_ID('Customer') IS NULL` before each `CREATE TABLE` so re-running is harmless.
+
+### Decisions the Data Model page doesn't cover yet
+
+Add these to the Data Model page as a "Sprint 2 notes" section. They don't change any existing table; they fill in details needed to write the SQL.
+
+| Decision | Why |
+|---|---|
+| `Ticket.technician_id` allows NULL | A ticket is logged first and assigned afterwards (#35) |
+| `Ticket.labor_cost` and `Ticket.total_cost` allow NULL | There's no cost until a quote is made (#39, Sprint 3) |
+| Defaults: `Ticket.status` = `'D'`, `Ticket.date_created` = today, `Customer.registration_date` = today, `Diagnosis_Note.note_date` = now, `Ticket_Parts.reserved_date` = now | The API doesn't have to send these |
+| If a customer can leave email blank, use a filtered unique index instead of a plain UNIQUE constraint: `CREATE UNIQUE INDEX UX_Customer_email ON Customer(email) WHERE email IS NOT NULL` | In SQL Server, a plain UNIQUE constraint only allows **one** NULL, so the second customer without an email would fail |
+| Indexes on `Ticket(status)`, `Ticket(technician_id)` and `Ticket(customer_id)` | The first two are on the Architecture page (Performance); the third speeds up a customer's repair history (#55) |
+
+Purchasing (#48, #49) needs supplier and supplier-order tables that aren't in the Data Model yet. That's planned for Sprint 4; nothing to do this sprint.
+
+### Putting the tables on crs-dev
+
+1. Test the scripts locally against the Docker database first.
+2. Once the scripts are reviewed and merged, Patryk runs `db:setup` and `db:seed` against `crs-dev` once, and tells the team.
+3. Leave the old `test_app` table alone for now. The currently deployed app still uses it, and because `db:setup` only adds tables, the dev site keeps working. Check its name doesn't clash with the new table names. It gets removed in Sprint 3 once nothing uses it.
+
+**Only fake data goes into `crs-dev`.** The dev site is public and has no sign-in, so real customer details there would break the GDPR rules on the Security Considerations page.
+
+---
+
+## API endpoints
+
+### Conventions (everyone follows these)
+
+- JSON field names are the **same as the database column names** (`first_name`, `ticket_id`, `current_stock`). Nobody has to translate between two naming styles.
+- Errors always come back as `{ "error": "Plain English message" }` with status `400` (bad input), `404` (not found) or `500` (something broke).
+- Creating something returns `201` and the new row. Updating returns `200` and the updated row.
+- The existing `/api/health` and `/api/health/db` stay exactly as they are; the pipeline's smoke test depends on them.
+
+### Customers (Albin)
+
+| Method | URL | Issue | Notes |
+|---|---|---|---|
+| GET | `/api/customers?search=byrne` | #34 | Matches first name, last name, email or phone. Put the `%` wildcards into the parameter value, not into the SQL string. |
+| GET | `/api/customers/:id` | #34 | |
+| POST | `/api/customers` | #53 | First and last name required, plus a phone or an email |
+| PUT | `/api/customers/:id` | #54 | |
+
+### Technicians (Dennis)
+
+| Method | URL | Issue | Notes |
+|---|---|---|---|
+| GET | `/api/technicians` | #35 | Used by the "assign to" dropdown on the ticket pages |
+| GET | `/api/technicians/:id` | #51 | |
+| POST | `/api/technicians` | #50 | Names and email required |
+| PUT | `/api/technicians/:id` | #51 | |
+
+### Tickets (Eron)
+
+| Method | URL | Issue | Notes |
+|---|---|---|---|
+| GET | `/api/tickets?status=D&technician_id=2&page=1&page_size=20` | #36 | Paginated (Architecture page, Performance). Returns `{ "items": [...], "page": 1, "page_size": 20, "total": 57 }`. Include the customer's and technician's names. |
+| GET | `/api/tickets/:id` | #38 | |
+| POST | `/api/tickets` | #33 | `customer_id`, `device_info`, `complaint` and `priority` required. Status starts as `D`. |
+| PUT | `/api/tickets/:id/technician` | #35 | Body: `{ "technician_id": 2 }` |
+| PUT | `/api/tickets/:id/status` | #38 | Body: `{ "status": "A" }`. Only the moves on the Workflow page are allowed (see below). |
+| GET | `/api/tickets/:id/notes` | #37 | Newest first |
+| POST | `/api/tickets/:id/notes` | #37 | Body: `{ "technician_id": 2, "note_text": "..." }` |
+
+For pagination, use `ORDER BY date_created DESC` with `OFFSET ... ROWS FETCH NEXT ... ROWS ONLY`, and cap `page_size` at 100.
+
+The allowed status moves come straight from the "Ticket status codes" table on the Workflow and Process Diagrams page. Put this in `tickets.service.js`:
+
+```js
+// From the Workflow and Process Diagrams page
+const ALLOWED_MOVES = {
+  D: ['A'],        // Diagnosing        -> Awaiting approval
+  A: ['R', 'X'],   // Awaiting approval -> Repairing or Declined
+  R: ['C'],        // Repairing         -> Completed
+  C: [],           // Completed         -> nothing
+  X: [],           // Declined          -> nothing
+};
+```
+
+In Sprint 3 two more rules get added here: moving to `A` needs a quote (#39), and moving to `C` goes through the closure checklist (#41).
+
+### Inventory (Elisha)
+
+| Method | URL | Issue | Notes |
+|---|---|---|---|
+| GET | `/api/inventory` | #43, #44 | Each part includes `low_stock: true/false`, true when `current_stock < min_stock_level` |
+| GET | `/api/inventory/:id` | #45 | |
+| POST | `/api/inventory` | #45 | Name required; stock, minimum level and price must be 0 or more |
+| PUT | `/api/inventory/:id` | #45 | Same checks as POST |
+
+---
+
+## Front-end pages
+
+Build each page from its wireframe on the UX Design page (the files are under `Patryk/Prototypes`). Plain HTML, CSS and JavaScript, as in ADR-001.
+
+| Page | File | Owner | Wireframe | Issues |
+|---|---|---|---|---|
+| Ticket list (home page) | `index.html` | Eron | Ticket list | #36, #35 |
+| New ticket | `ticket-new.html` | Eron | Create ticket | #33, #34 |
+| Ticket detail | `ticket.html` | Eron | Ticket detail (Sprint 2 covers status and notes only; quote and parts come in Sprint 3) | #38, #37 |
+| Customers | `customers.html` | Albin | Customers | #53, #54 |
+| Technicians | `technicians.html` | Dennis | Technicians | #50, #51 |
+| Inventory | `inventory.html` | Elisha | Inventory | #43, #44, #45 |
+
+The new ticket list replaces the current single-page form as the home page. When Eron's New ticket page works, remove the old form, its endpoint and its tests **in the same pull request**, so the pipeline never has tests for code that's gone.
+
+### Every page follows these basics
+
+These come from the usability notes on the UX Design page and the Security Considerations page.
+
+- Status and priority badges show **text as well as colour** ("Repairing", not only an orange dot), so they work for colour-blind users and screen readers.
+- Every input has a `<label>`.
+- Anything clickable is a real `<button>` or `<a>`, so it works with the keyboard.
+- If the API returns an error, show the message on the page, not only in the console.
+- Show text that users typed with `textContent`, **never** `innerHTML` (this blocks script injection, the XSS risk on the Security page).
+- Load everything through the shared `api.js` helper.
+
+---
+
+## Testing
+
+- **Automated tests:** Jest with Supertest, with the data layer mocked, as in ADR-006. Every endpoint gets at least two tests: one that succeeds and one that's rejected.
+- **Rules:** test the rules in the service layer directly too. For ticket status, test every allowed move and a few blocked ones (for example `D` → `C`).
+- **Manual testing:** do it locally with `docker compose up --build` and fake data. **Never** run tests, bulk deletes or `db:reset` against `crs-dev`, as the "How to connect" section on the DevOps Tool Selection page already says.
+- **After each deploy:** open your page on the dev site and click through it once.
+
+---
+
+## Security this sprint
+
+These are the risks from the Security Considerations register that apply to code we write now.
+
+| Risk | What we do in Sprint 2 |
+|---|---|
+| SQL injection | Every query passes values with `.input(...)`. Reviewers reject any pull request that builds SQL by joining strings with user input. |
+| Script injection (XSS) | `textContent`, never `innerHTML`, for anything a user typed |
+| Secrets committed to the repo | `.env` stays in `.gitignore`. The database password never goes in code, commits or this wiki. |
+| Vulnerable third-party packages | `npm audit` step added to the pipeline as part of finishing #23 |
+| Customer personal data exposed | HTTPS Only on the App Service (F6); only fake data on the dev site |
+
+Sign-in, roles, password rules, the audit log and the key vault all depend on the #60 decision, so they wait for a later sprint (see [Future sprints](#future-sprints)).
+
+---
+
+## Definition of done
+
+An issue only moves to **Done** when every box is ticked:
+
+- [ ] The API follows the routes → controllers → services → data access pattern
+- [ ] The page works in the browser and matches its wireframe closely enough
+- [ ] Every SQL query uses parameters (`.input(...)`)
+- [ ] User-typed text is shown with `textContent`
+- [ ] At least two Jest tests per endpoint: one success, one failure
+- [ ] `npm run lint` and `npm test` pass locally
+- [ ] The pull request was reviewed by a teammate and the pipeline is green
+- [ ] Checked on https://crs-dev-i3q75k.azurewebsites.net after the deploy
+- [ ] The work item has been moved across the board to Done
+
+---
+
+## How we work day to day
+
+- **One branch per issue**, named like `feature/33-log-ticket`.
+- **Put the work item number in every commit message**, like `#33 add ticket insert query`, so commits link to the board.
+- **Keep pull requests small**, ideally one issue each. Your reviewer from [Who does what](#who-does-what) reviews within one working day.
+- **Pull `main` before you start work each day** to avoid painful merge conflicts.
+- **Stuck for more than an hour? Say so in the team chat.** Losing a day to a problem someone else could fix in five minutes is the biggest risk this sprint.
+- **Move your cards as you go.** The board is our evidence for the rubric.
+
+### Board setup for Sprint 2
+
+- [ ] Create the **Sprint 2** iteration and move all the Must and Stretch issues into it
+- [ ] Under each issue, add three child Tasks: **API**, **Page**, **Tests**
+- [ ] Create Tasks F1–F6 and assign them to Patryk
+- [ ] Assign every issue and its three Tasks to the owner in [Who does what](#who-does-what)
+- [ ] Add the Predecessor/Successor links from [Order of work](#order-of-work)
+
+---
+
+## Sprint 2 risks
+
+| Risk | What we do about it |
+|---|---|
+| The foundation (F1–F3) is late and everyone is blocked | Patryk pushes F1–F3 first; meanwhile everyone else builds their pages with made-up data |
+| Merge conflicts in shared files | Shared files have one owner (Patryk); all routers are registered up front in F1; small pull requests |
+| Someone damages the shared `crs-dev` data | Destructive testing happens locally only; `db:reset` refuses to run against anything but `localhost` |
+| The Tickets module is too much for one person | #37 is a stretch goal. Technicians is the smallest module, so Dennis picks up #37 if Eron runs short of time, with Patryk as backup |
+| A pull request build deploys unreviewed code | The deploy condition in F6 |
+
+---
+
+## Carry-over from Sprint 1
+
+- [ ] **#23 Dependency Management (Albin):** fill in the Packages table from `package.json`, the risks for each external dependency, the `npm audit` step, and the Predecessor/Successor links.
+- [ ] **Technology Stack page (Patryk):** the ADRs still show `Work item: #` with no number. Fill them in, and add ADR-007 below.
+- [ ] **Tidy up finished pages:** remove the leftover "This page is a template for the owner..." lines from #17 and #22, and check the #17 architecture diagram is embedded on its page.
+
+### ADR-007, ready to paste into the Technology Stack page
+
+> **ADR-007: Database changes — numbered SQL scripts**
+> Status: Accepted
+> Work item: # (the F3 task)
+> Context: The app is moving from a one-table schema to the six tables on the Data Model page, and the same tables need to exist locally and on `crs-dev` (later `crs-test` and `crs-prod`).
+> Decision: Plain SQL files in `database/`, run in number order with `npm run db:setup`. Scripts only add; they never drop. No ORM, in line with ADR-004.
+> Consequences: Anyone can read and review the SQL. Every future table change must be a new numbered file, never an edit to an old one. Would need revisiting if schema changes become frequent enough to need a migration tool.
+
+---
+
+## Future sprints
+
+This is the plan so far. Each sprint's planning meeting can change it.
+
+| Sprint | Goal | Issues | Other work |
+|---|---|---|---|
+| 3 | Quote, parts and closing a repair (the rest of the Walk-in repair, Quote approval and Closing a ticket flows) | #39, #40, #46, #47, #41, #42, #55, #52, plus any Sprint 2 stretch items left over | Wrap reserving and using stock in SQL transactions so stock counts can't go wrong; remove the old `test_app` table; add a test-environment stage to the pipeline for `crs-test-i3q75k`; **decide on #60 Staff sign-in** |
+| 4 | Purchasing and making it safe for real data | #48, #49, and #60 if the team agreed to it | Add supplier and supplier-order tables as a new section on the Data Model page; add a prod stage with manual approval for `crs-prod-i3q75k`; move the database password into Key Vault; audit log for ticket changes |
+| 5 onwards | Polish | Bugs found in testing | Accessibility check of every page, performance check with a large amount of fake data |
+
+**Before any real customer data goes into `crs-prod`,** something has to restrict who can open the app: either sign-in (#60) or App Service access restrictions. Otherwise customer details would be public, which breaks the GDPR section of the Security page.
+
+---
+
+## Appendix: pattern to copy
+
+This is the Customers "register a new customer" feature (#53) through every layer. Copy it for your own module and change the names.
+
+### Shared helpers (F2, Patryk)
+
+```js
+// src/errors.js
+function httpError(status, message) {
+  const err = new Error(message);
+  err.status = status;
+  return err;
+}
+
+module.exports = { httpError };
+```
+
+```js
+// src/db.js – one shared connection pool for the whole app
+const sql = require('mssql');
+
+const config = {
+  server: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  options: {
+    encrypt: true,
+    trustServerCertificate: process.env.DB_TRUST_SERVER_CERT === 'true',
+  },
+};
+
+let poolPromise;
+
+function getPool() {
+  if (!poolPromise) {
+    poolPromise = new sql.ConnectionPool(config).connect();
+  }
+  return poolPromise;
+}
+
+module.exports = { sql, getPool };
+```
+
+```js
+// in src/app.js, after all the routers
+app.use((err, req, res, next) => {
+  if (err.status) {
+    return res.status(err.status).json({ error: err.message });
+  }
+  console.error(err);
+  res.status(500).json({ error: 'Something went wrong' });
+});
+```
+
+`test_app` already connects to the database, so reuse its existing settings in `db.js`. The point is that there's exactly one pool.
+
+### 1. Route
+
+```js
+// src/modules/customers/customers.routes.js
+const express = require('express');
+const controller = require('./customers.controller');
+
+const router = express.Router();
+
+router.get('/', controller.list);         // GET  /api/customers?search=
+router.get('/:id', controller.getById);   // GET  /api/customers/5
+router.post('/', controller.create);      // POST /api/customers
+router.put('/:id', controller.update);    // PUT  /api/customers/5
+
+module.exports = router;
+```
+
+### 2. Controller
+
+```js
+// src/modules/customers/customers.controller.js
+const service = require('./customers.service');
+
+async function create(req, res, next) {
+  try {
+    const customer = await service.create(req.body);
+    res.status(201).json(customer);
+  } catch (err) {
+    next(err); // the error handler in app.js turns this into a response
+  }
+}
+
+module.exports = { create /*, list, getById, update */ };
+```
+
+### 3. Service
+
+```js
+// src/modules/customers/customers.service.js
+const data = require('./customers.data');
+const { httpError } = require('../../errors');
+
+async function create(input) {
+  if (!input.first_name || !input.last_name) {
+    throw httpError(400, 'First and last name are required');
+  }
+  if (!input.phone && !input.email) {
+    throw httpError(400, 'Give a phone number or an email address');
+  }
+  if (input.first_name.length > 50 || input.last_name.length > 50) {
+    throw httpError(400, 'Names must be 50 characters or fewer');
+  }
+  return data.insert(input);
+}
+
+module.exports = { create };
+```
+
+### 4. Data access
+
+```js
+// src/modules/customers/customers.data.js
+const { sql, getPool } = require('../../db');
+
+async function insert(c) {
+  const pool = await getPool();
+  const result = await pool.request()
+    .input('first_name', sql.VarChar(50), c.first_name)
+    .input('last_name', sql.VarChar(50), c.last_name)
+    .input('email', sql.VarChar(100), c.email || null)
+    .input('phone', sql.VarChar(20), c.phone || null)
+    .input('address', sql.VarChar(255), c.address || null)
+    .query(`
+      INSERT INTO Customer (first_name, last_name, email, phone, address)
+      OUTPUT INSERTED.*
+      VALUES (@first_name, @last_name, @email, @phone, @address)
+    `);
+  return result.recordset[0];
+}
+
+module.exports = { insert };
+```
+
+**Never** do this. It is exactly the SQL injection risk on the Security page:
+
+```js
+// WRONG – user input glued into the SQL string
+pool.request().query(`SELECT * FROM Customer WHERE last_name = '${search}'`);
+```
+
+For a search, put the wildcards into the parameter value instead:
+
+```js
+.input('search', sql.VarChar(100), `%${search}%`)
+.query('SELECT * FROM Customer WHERE last_name LIKE @search OR phone LIKE @search');
+```
+
+### 5. Tests
+
+```js
+// tests/customers.test.js
+const request = require('supertest');
+const app = require('../src/app');
+const data = require('../src/modules/customers/customers.data');
+
+jest.mock('../src/modules/customers/customers.data'); // no real database
+
+test('POST /api/customers creates a customer', async () => {
+  data.insert.mockResolvedValue({ customer_id: 1, first_name: 'Mary', last_name: 'Byrne' });
+
+  const res = await request(app)
+    .post('/api/customers')
+    .send({ first_name: 'Mary', last_name: 'Byrne', phone: '0870000000' });
+
+  expect(res.status).toBe(201);
+  expect(res.body.customer_id).toBe(1);
+});
+
+test('POST /api/customers rejects a missing name', async () => {
+  const res = await request(app)
+    .post('/api/customers')
+    .send({ phone: '0870000000' });
+
+  expect(res.status).toBe(400);
+  expect(data.insert).not.toHaveBeenCalled();
+});
+```
+
+### 6. Front end
+
+```js
+// public/js/api.js (shared, F5)
+async function api(path, options = {}) {
+  const res = await fetch(path, {
+    method: options.method || 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    body: options.body ? JSON.stringify(options.body) : undefined,
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(body.error || 'Request failed');
+  }
+  return body;
+}
+```
+
+```js
+// public/js/customers.js
+async function saveCustomer() {
+  const message = document.getElementById('message');
+  try {
+    const customer = await api('/api/customers', {
+      method: 'POST',
+      body: {
+        first_name: document.getElementById('first_name').value,
+        last_name: document.getElementById('last_name').value,
+        phone: document.getElementById('phone').value,
+        email: document.getElementById('email').value,
+      },
+    });
+    message.textContent = `Saved ${customer.first_name} ${customer.last_name}`; // textContent, never innerHTML
+  } catch (err) {
+    message.textContent = err.message; // show the API's error on the page
+  }
+}
+```
